@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
-import { SignIn, SignOut } from "~/components/auth";
+import { SignOut } from "~/components/auth";
 
 export async function AuthShowcase() {
   const supabase = createServerComponentClient({ cookies });
@@ -11,9 +12,12 @@ export async function AuthShowcase() {
 
   if (!session) {
     return (
-      <SignIn className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20">
-        Sign in with Discord
-      </SignIn>
+      <Link
+        className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
+        href="/login"
+      >
+        Sign in
+      </Link>
     );
   }
 
