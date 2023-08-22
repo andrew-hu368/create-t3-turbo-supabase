@@ -1,7 +1,11 @@
-# create-t3-turbo
+# create-t3-turbo-supabase
 
 > **Note**
 > Due to high demand, this repo now uses the `app` directory with some new experimental features. If you want to use the more traditional `pages` router, [check out the repo before the update](https://github.com/t3-oss/create-t3-turbo/tree/414aff131ca124573e721f3779df3edb64989fd4).
+
+## Disclaimer
+
+This is a fork from the original `create-t3-turbo` with up to date dependencies and a few changes to make it work with Supabase. You can check out the original version [here](https://github.com/supabase-community/create-t3-turbo).
 
 ## Installation
 
