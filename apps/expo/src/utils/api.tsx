@@ -1,5 +1,6 @@
 import React from "react";
 import Constants from "expo-constants";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
@@ -45,6 +46,7 @@ const getBaseUrl = () => {
  */
 
 export function TRPCProvider(props: { children: React.ReactNode }) {
+  const supabase = useSupabaseClient();
   const [queryClient] = React.useState(() => new QueryClient());
   const [trpcClient] = React.useState(() =>
     api.createClient({
@@ -52,9 +54,15 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
-          headers() {
+          async headers() {
+            const { data } = await supabase.auth.getSession();
+            const token = data.session?.access_token;
+
             const headers = new Map<string, string>();
             headers.set("x-trpc-source", "expo-react");
+            if (token) {
+              headers.set("Authorization", token);
+            }
             return Object.fromEntries(headers);
           },
         }),

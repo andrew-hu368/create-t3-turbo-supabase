@@ -1,5 +1,12 @@
 import type { ExpoConfig } from "@expo/config";
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (typeof SUPABASE_URL !== "string" || typeof SUPABASE_ANON_KEY !== "string") {
+  throw new Error("Missing Supabase URL or anonymous key");
+}
+
 const defineConfig = (): ExpoConfig => ({
   name: "expo",
   slug: "expo",
@@ -27,11 +34,13 @@ const defineConfig = (): ExpoConfig => ({
       backgroundColor: "#1F104A",
     },
   },
-  // extra: {
-  //   eas: {
-  //     projectId: "your-eas-project-id",
-  //   },
-  // },
+  extra: {
+    // eas: {
+    //   projectId: "your-eas-project-id",
+    // },
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+  },
   experiments: {
     tsconfigPaths: true,
     typedRoutes: true,
