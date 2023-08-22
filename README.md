@@ -7,6 +7,24 @@
 
 This is a fork from the original `create-t3-turbo` with up to date dependencies and a few changes to make it work with Supabase. You can check out the original version [here](https://github.com/supabase-community/create-t3-turbo).
 
+The repo comes with migrations already created. You may need to delete them and follow the steps below to create your own if you end up changing the auth schema.
+
+- Pull the latest schema changes by running `prisma db pull`
+- Create a migration file by running
+
+```
+prisma migrate diff \
+--from-empty \
+--to-schema-datamodel prisma/schema.prisma \
+--script > prisma/migrations/0_init_prisma_db_pull/migration.sql
+```
+
+- Delete any code that is not valid SQL schema
+- Apply changes to the SQL as described [here](https://github.com/prisma/prisma/issues/17734#issuecomment-1454954128)
+- Run `prisma migrate resolve --applied 0_init_prisma_db_pull` to create a migration record in the database
+- Add the Post model back to the schema
+- Run `prisma migrate dev`. It should NOT modify the auth schema and ONLY create the post model.
+
 ## Installation
 
 There are two ways of initializing an app using the `create-t3-turbo` starter. You can either use this repository as a template:
