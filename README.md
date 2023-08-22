@@ -25,6 +25,8 @@ prisma migrate diff \
 - Add the Post model back to the schema
 - Run `prisma migrate dev`. It should NOT modify the auth schema and ONLY create the post model.
 
+Original author is [here](https://medium.com/@ngoctranfire/using-prisma-with-supabase-row-level-security-and-multi-schema-7c53418adba3)
+
 ## Installation
 
 There are two ways of initializing an app using the `create-t3-turbo` starter. You can either use this repository as a template:
