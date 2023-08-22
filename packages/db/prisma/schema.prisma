@@ -60,7 +60,7 @@ model users {
   mfa_factors                 mfa_factors[]
   sessions                    sessions[]
 
-  @@index([instance_id])
+  @@index([instance_id], name: "users_instance_id_idx")
   @@schema("auth")
 }
 
@@ -86,8 +86,11 @@ model flow_state {
   provider_refresh_token String?
   created_at             DateTime?             @db.Timestamptz(6)
   updated_at             DateTime?             @db.Timestamptz(6)
+  authentication_method  String
 
-  @@index([auth_code], map: "idx_auth_code")
+  @@index([created_at], name: "flow_state_created_at_idx")
+  @@index([auth_code], name: "idx_auth_code")
+  @@index([user_id, authentication_method], name: "idx_user_id_auth_method")
   @@schema("auth")
 }
 
@@ -103,8 +106,8 @@ model identities {
   users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([provider, id])
-  @@index([email])
-  @@index([user_id])
+  @@index([email], name: "identities_email_idx")
+  @@index([user_id], name: "identities_user_id_idx")
   @@schema("auth")
 }
 
@@ -115,6 +118,7 @@ model instances {
   created_at      DateTime? @db.Timestamptz(6)
   updated_at      DateTime? @db.Timestamptz(6)
 
+  @@index([uuid], name: "instances_uuid_idx")
   @@schema("auth")
 }
 
@@ -138,6 +142,7 @@ model mfa_challenges {
   ip_address  String      @db.Inet
   mfa_factors mfa_factors @relation(fields: [factor_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mfa_challenges_auth_factor_id_fkey")
 
+  @@index([created_at], name: "mfa_challenge_created_at_idx")
   @@schema("auth")
 }
 
@@ -153,6 +158,7 @@ model mfa_factors {
   mfa_challenges mfa_challenges[]
   users          users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@unique([friendly_name, user_id], name: "mfa_factors_user_friendly_name_unique")
   @@index([user_id, created_at], map: "factor_id_created_at_idx")
   @@schema("auth")
 }
@@ -169,11 +175,11 @@ model refresh_tokens {
   session_id  String?   @db.Uuid
   sessions    sessions? @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([instance_id])
-  @@index([instance_id, user_id])
-  @@index([parent])
-  @@index([session_id, revoked])
-  @@index([token])
+  @@index([instance_id], name: "refresh_tokens_instance_id_idx")
+  @@index([instance_id, user_id], name: "refresh_tokens_instance_id_user_id_idx")
+  @@index([parent], name: "refresh_tokens_parent_idx")
+  @@index([session_id, revoked], name: "refresh_tokens_session_id_revoked_idx")
+  @@index([updated_at], name: "refresh_tokens_updated_at_idx")
   @@schema("auth")
 }
 
@@ -188,7 +194,7 @@ model saml_providers {
   updated_at        DateTime?     @db.Timestamptz(6)
   sso_providers     sso_providers @relation(fields: [sso_provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([sso_provider_id])
+  @@index([sso_provider_id], name: "saml_providers_sso_provider_id_idx")
   @@schema("auth")
 }
 
@@ -203,13 +209,14 @@ model saml_relay_states {
   updated_at      DateTime?     @db.Timestamptz(6)
   sso_providers   sso_providers @relation(fields: [sso_provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([for_email])
-  @@index([sso_provider_id])
+  @@index([created_at], name: "saml_relay_states_created_at_idx")
+  @@index([for_email], name: "saml_relay_states_for_email_idx")
+  @@index([sso_provider_id], name: "saml_relay_states_sso_provider_id_idx")
   @@schema("auth")
 }
 
 model schema_migrations {
-  version String @unique(map: "schema_migrations_version_idx") @db.VarChar(14)
+  version String @id
 
   @@schema("auth")
 }
@@ -226,8 +233,9 @@ model sessions {
   refresh_tokens refresh_tokens[]
   users          users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([user_id])
-  @@index([user_id, created_at], map: "user_id_created_at_idx")
+  @@index([not_after], name: "sessions_not_after_idx")
+  @@index([user_id], name: "sessions_user_id_idx")
+  @@index([user_id, created_at], name: "user_id_created_at_idx")
   @@schema("auth")
 }
 
@@ -239,7 +247,8 @@ model sso_domains {
   updated_at      DateTime?     @db.Timestamptz(6)
   sso_providers   sso_providers @relation(fields: [sso_provider_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([sso_provider_id])
+  @@unique([domain], name: "sso_domains_domain_idx")
+  @@index([sso_provider_id], name: "sso_domains_sso_provider_id_idx")
   @@schema("auth")
 }
 
@@ -252,6 +261,7 @@ model sso_providers {
   saml_relay_states saml_relay_states[]
   sso_domains       sso_domains[]
 
+  @@unique([resource_id], name: "sso_providers_resource_id_idx")
   @@schema("auth")
 }
 
